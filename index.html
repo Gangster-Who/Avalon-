@@ -88,15 +88,25 @@
         let voices = [];
 
         function populateVoices() {
-            voices = window.speechSynthesis.getVoices().filter(voice => voice.lang.includes('zh'));
+            // 首先清空语音列表
+            voices = window.speechSynthesis.getVoices();
             let voiceSelect = document.getElementById('voice');
-            voiceSelect.innerHTML = ''; // Clear previous voices
-
+            voiceSelect.innerHTML = '';
+        
+            // 确保语音列表不为空
+            if (voices.length === 0) {
+                window.speechSynthesis.onvoiceschanged = populateVoices;
+                return;
+            }
+        
+            // 填充语音选项
             voices.forEach((voice, i) => {
-                let option = document.createElement('option');
-                option.value = i;
-                option.textContent = `${voice.name} (${voice.lang})`;
-                voiceSelect.appendChild(option);
+                if (voice.lang.includes('zh')) { // 只显示中文语音
+                    let option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    voiceSelect.appendChild(option);
+                }
             });
         }
 
