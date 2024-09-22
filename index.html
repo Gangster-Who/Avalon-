@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿瓦隆主持人</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        #roles-section {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+        }
+        .role-row {
+            margin: 10px;
+            text-align: center;
+        }
+        .role-img {
+            width: 150px;
+            border: 5px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .selected {
+            border-color: red;
+        }
+        #playerCountSection {
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>阿瓦隆主持人</h1>
+
+    <!-- Role Selection Section -->
+    <div id="roles-section">
+        <div class="role-row">
+            <img src="morgana.png" alt="莫甘娜" id="morgana" class="role-img" onclick="toggleRoleSelection('morgana')">
+            <p>莫甘娜</p>
+        </div>
+        <div class="role-row">
+            <img src="oberon.png" alt="奥伯伦" id="oberon" class="role-img" onclick="toggleRoleSelection('oberon')">
+            <p>奥伯伦</p>
+        </div>
+        <div class="role-row">
+            <img src="percival.png" alt="派西维尔" id="percival" class="role-img" onclick="toggleRoleSelection('percival')">
+            <p>派西维尔</p>
+        </div>
+        <div class="role-row">
+            <img src="mordred.png" alt="莫德雷德" id="mordred" class="role-img" onclick="toggleRoleSelection('mordred')">
+            <p>莫德雷德</p>
+        </div>
+    </div>
+
+    <!-- Voice and Text-to-Speech Settings -->
+    <div id="voice-settings">
+        <h2>语音设置</h2>
+        <label for="voice">选择语音:</label>
+        <select id="voice"></select>
+
+        <label for="rate">语速 (0.5 - 2.0):</label>
+        <input type="number" id="rate" value="1" min="0.5" max="2" step="0.1">
+
+        <button onclick="readRoles()">朗读角色</button>
+    </div>
+
+    <!-- Player Count (Less important, moved to bottom) -->
+    <div id="playerCountSection">
+        <label for="players">选择玩家数量:</label>
+        <select id="players">
+            <option value="5">5 玩家</option>
+            <option value="6">6 玩家</option>
+            <option value="7">7 玩家</option>
+            <option value="8">8 玩家</option>
+            <option value="9">9 玩家</option>
+            <option value="10">10 玩家</option>
+        </select>
+    </div>
+
+    <script>
+        // Populate voices for speech synthesis
+        let voices = [];
+
+        function populateVoices() {
+            voices = window.speechSynthesis.getVoices().filter(voice => voice.lang.includes('zh'));
+            let voiceSelect = document.getElementById('voice');
+            voiceSelect.innerHTML = ''; // Clear previous voices
+
+            voices.forEach((voice, i) => {
+                let option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        // Handle role selection toggle
+        function toggleRoleSelection(roleId) {
+            const roleImg = document.getElementById(roleId);
+            roleImg.classList.toggle('selected'); // Add or remove 'selected' class to highlight
+
+            // Handle automatic selection of Percival and Morgana
+            if (roleId === 'morgana' || roleId === 'percival') {
+                const oppositeId = roleId === 'morgana' ? 'percival' : 'morgana';
+                const oppositeRoleImg = document.getElementById(oppositeId);
+                oppositeRoleImg.classList.add('selected');
+            }
+        }
+
+        // Read selected roles aloud
+        function readRoles() {
+            let rate = document.getElementById('rate').value;
+            let selectedVoiceIndex = document.getElementById('voice').value;
+            let selectedVoice = voices[selectedVoiceIndex];
+
+            let oberon = document.getElementById('oberon').classList.contains('selected');
+            let mordred = document.getElementById('mordred').classList.contains('selected');
+            let percival = document.getElementById('percival').classList.contains('selected');
+            let morgana = document.getElementById('morgana').classList.contains('selected');
+
+            // Game instructions based on selected roles
+            let script = `請所有人閉上眼睛低頭雙手握拳放在自己面前，${oberon ? '除了奧伯倫以外，' : ''}請壞人張開眼睛確認彼此身份，（5，4，3，2，1）請壞人閉上眼睛，${mordred ? '除了莫德雷德之外，' : ''}請所有壞人豎起你們的大拇指，請梅林張開眼睛確認壞人身份，（5，4，3，2，1），請壞人收起大拇指請梅林閉上眼睛，`;
+
+            if (percival && morgana) {
+                script += `請梅林和莫甘娜豎起你們的大拇指，請派希維爾張開眼睛確認身份，（5，4，3，2，1），請梅林和莫甘娜收回大拇指請派希維爾閉上眼睛，`;
+            }
+
+            script += '請所有人張開眼睛遊戲開始。';
+
+            let msg = new SpeechSynthesisUtterance(script);
+            msg.voice = selectedVoice;
+            msg.rate = rate;
+            window.speechSynthesis.speak(msg);
+        }
+
+        // Trigger when the page loads
+        window.speechSynthesis.onvoiceschanged = populateVoices;
+    </script>
+</body>
+</html>
