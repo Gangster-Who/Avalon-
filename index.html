@@ -84,22 +84,25 @@
     </div>
 
     <script>
-        // Populate voices for speech synthesis
+        // 用于填充语音列表
         let voices = [];
 
+        // 检查 Safari 浏览器
+        function isSafari() {
+            return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        }
+
+        // 填充语音的函数
         function populateVoices() {
-            // 首先清空语音列表
             voices = window.speechSynthesis.getVoices();
             let voiceSelect = document.getElementById('voice');
             voiceSelect.innerHTML = '';
-        
-            // 确保语音列表不为空
+
             if (voices.length === 0) {
                 window.speechSynthesis.onvoiceschanged = populateVoices;
                 return;
             }
-        
-            // 填充语音选项
+
             voices.forEach((voice, i) => {
                 if (voice.lang.includes('zh')) { // 只显示中文语音
                     let option = document.createElement('option');
@@ -108,14 +111,19 @@
                     voiceSelect.appendChild(option);
                 }
             });
+
+            // 如果 Safari 浏览器没有加载语音
+            if (isSafari() && voices.length === 0) {
+                alert('Safari 浏览器可能不支持语音合成功能。请使用 Chrome 获取最佳体验。');
+            }
         }
 
-        // Handle role selection toggle
+        // 切换角色选择
         function toggleRoleSelection(roleId) {
             const roleImg = document.getElementById(roleId);
-            roleImg.classList.toggle('selected'); // Add or remove 'selected' class to highlight
-
-            // Handle automatic selection of Percival and Morgana
+            roleImg.classList.toggle('selected'); // 添加或移除选中的 class
+            
+            // 自动选择派西维尔和莫甘娜
             if (roleId === 'morgana' || roleId === 'percival') {
                 const oppositeId = roleId === 'morgana' ? 'percival' : 'morgana';
                 const oppositeRoleImg = document.getElementById(oppositeId);
@@ -123,7 +131,7 @@
             }
         }
 
-        // Read selected roles aloud
+        // 朗读角色信息
         function readRoles() {
             let rate = document.getElementById('rate').value;
             let selectedVoiceIndex = document.getElementById('voice').value;
@@ -134,7 +142,7 @@
             let percival = document.getElementById('percival').classList.contains('selected');
             let morgana = document.getElementById('morgana').classList.contains('selected');
 
-            // Game instructions based on selected roles
+            // 根据选择的角色生成脚本
             let script = `請所有人閉上眼睛低頭雙手握拳放在自己面前，${oberon ? '除了奧伯倫以外，' : ''}請壞人張開眼睛確認彼此身份，（5，4，3，2，1）請壞人閉上眼睛，${mordred ? '除了莫德雷德之外，' : ''}請所有壞人豎起你們的大拇指，請梅林張開眼睛確認壞人身份，（5，4，3，2，1），請壞人收起大拇指請梅林閉上眼睛，`;
 
             if (percival && morgana) {
@@ -149,7 +157,7 @@
             window.speechSynthesis.speak(msg);
         }
 
-        // Trigger when the page loads
+        // 页面加载时填充语音列表
         window.speechSynthesis.onvoiceschanged = populateVoices;
     </script>
 </body>
